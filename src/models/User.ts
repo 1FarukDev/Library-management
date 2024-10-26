@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { randomUUID } from "crypto";
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
