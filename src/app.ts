@@ -4,7 +4,7 @@ import 'express-async-errors'
 import connectDB from './db/connect';
 import authRouter from './routes/auth';
 import bookRouter from './routes/books'
-
+import commentRouter from './routes/comments'
 import notFound from './middleware/not-found';
 import errorHandlerMiddleware from './middleware/error-handler';
 
@@ -19,6 +19,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/book', bookRouter)
+app.use('/api/v1/books', commentRouter)
 
 
 app.use(notFound);

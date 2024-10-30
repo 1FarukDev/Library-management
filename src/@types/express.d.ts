@@ -10,3 +10,13 @@ declare global {
         }
     }
 }
+
+
+
+export interface AuthenticatedRequest extends Request {
+    user?: {
+        userId: string;
+        name: string
+
+    }
+}

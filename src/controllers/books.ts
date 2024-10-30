@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Books from "../models/Books";
-import { StatusCodes } from "http-status-codes";
-import mongoose from "mongoose";
+import { StatusCodes } from "http-status-codes"
 
 interface AuthenticatedRequest extends Request {
     user?: {

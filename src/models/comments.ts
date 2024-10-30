@@ -7,7 +7,6 @@ export interface IComment extends Document {
     book: IBook["_id"];
     comment: string;
     rating: number;
-    createdAt: Date;
 }
 
 const commentSchema: Schema = new Schema(
@@ -31,9 +30,8 @@ const commentSchema: Schema = new Schema(
             type: Number,
             min: 1,
             max: 5,
-            required: true,
+            required: false,
         },
-        createdAt: { type: Date, default: Date.now },
     },
     {
         timestamps: true,

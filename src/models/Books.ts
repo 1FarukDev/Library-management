@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
-import { IUser } from "./User"; 
+import { IUser } from "./User";
+import { IComment } from "./comments";
 
 export interface IBook extends Document {
     title: string;
@@ -17,7 +18,8 @@ export interface IBook extends Document {
             file_url?: string;
         };
     };
-    createdBy: IUser["_id"]; 
+    createdBy: IUser["_id"];
+    comments: IComment["_id"][];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -58,7 +60,7 @@ const bookSchema: Schema = new Schema(
                 },
                 file_formats: {
                     type: [String],
-                    enum: ["pdf", "epub", "mobi"], 
+                    enum: ["pdf", "epub", "mobi"],
                     default: undefined,
                 },
                 file_size: {
@@ -73,9 +75,15 @@ const bookSchema: Schema = new Schema(
         },
         createdBy: {
             type: Schema.Types.ObjectId,
-            ref: "User", 
+            ref: "User",
             required: true,
         },
+        comments: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "comments",
+            },
+        ],
     },
     {
         timestamps: true,
