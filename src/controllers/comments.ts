@@ -5,6 +5,21 @@ import { StatusCodes } from "http-status-codes"
 import { AuthenticatedRequest } from "../@types/express";
 
 
+const getComment = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { bookId } = req.params
+        const comment = await Comments.find({ book: bookId }).populate("user", "name");
+        if (!comment || comment.length === 0) {
+            const error = new Error("Comment not found") as any
+            error.statusCode = StatusCodes.NOT_FOUND
+            throw error
+        }
+        res.status(StatusCodes.OK).json({ comment: comment, count: comment.length })
+    } catch (error) {
+        next(error)
+    }
+}
+
 const createComment = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
         if (!req.user || !req.user.userId) {
@@ -36,4 +51,4 @@ const createComment = async (req: AuthenticatedRequest, res: Response, next: Nex
     }
 }
 
-export { createComment }
+export { createComment, getComment }
