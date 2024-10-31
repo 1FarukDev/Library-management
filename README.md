@@ -71,7 +71,7 @@ The system implements the following access control:
    - View list of books (`GET /books`)
    - View single book details (`GET /books/:id`)
    - Search books
-   - View book reviews and ratings
+   - View book comments and ratings (`GET /books/:id/comments`)
 
 2. **Admin Access** (requires authentication with admin role):
    - Create new books (`POST /books`)
@@ -79,6 +79,10 @@ The system implements the following access control:
    - Delete books (`DELETE /books/:id`)
    - Manage book categories
    - Moderate comments and reviews
+3. **User Access** (requires authentication with user role):
+   - Create new comments (`POST /books/:id/comments`)
+   - Buy book 
+   - Borrow books
 
 ## Features to Implement
 
