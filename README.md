@@ -18,6 +18,7 @@ Thank you for considering contributing to the **Library Management System**! Thi
     - [Testing Guidelines](#testing-guidelines)
     - [Code Style](#code-style)
   - [Need Help?](#need-help)
+  - [Data base schema design](#data-base-schema-design)
 
 ## Code of Conduct
 
@@ -300,3 +301,7 @@ If you need help or have questions:
 2. Contact maintainers through the issue tracker
 
 Thank you for contributing to the Library Management System! Your efforts help make this project better for everyone.
+
+## Data base schema design
+
+![Database design schema](src/assets/images/Librarydatabaseschema.png)
