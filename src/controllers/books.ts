@@ -36,4 +36,29 @@ const createBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
     }
 }
 
-export { getAllBooks, createBook }
+const updateBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { id } = req.params
+        const { userId } = req.user || {}
+        if (!userId) {
+            const error = new Error('Unauthorizes') as any;
+            error.statusCodes = StatusCodes.UNAUTHORIZED
+            throw error
+        }
+        const book = await Books.findOneAndUpdate(
+            { _id: id, createdBy: userId },
+            req.body,
+            { new: true, runValidators: true }
+        )
+        if (!book) {
+            const error = new Error('Book not found or you are not authorized to edit the book') as any
+            error.statusCodes = StatusCodes.NOT_FOUND
+            throw error
+        }
+        res.status(StatusCodes.OK).json({ book })
+    } catch (error) {
+
+    }
+}
+
+export { getAllBooks, createBook, updateBook }
