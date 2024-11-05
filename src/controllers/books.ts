@@ -87,4 +87,19 @@ const deleteBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
     }
 }
 
-export { getAllBooks, createBook, updateBook, deleteBook }
+const getSingleBook = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { id } = req.params
+        const book = await Books.findById(id);
+        if (!book) {
+            const error = new Error('Book not found') as any;
+            error.statusCode = StatusCodes.NOT_FOUND;
+            throw error;
+        }
+        res.status(StatusCodes.OK).json({ book })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook }
