@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import Books from "../models/Books";
 import { StatusCodes } from "http-status-codes"
-
+import mongoose from 'mongoose';
 interface AuthenticatedRequest extends Request {
     user?: {
         userId: string;
@@ -41,7 +41,7 @@ const updateBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
         const { id } = req.params
         const { userId } = req.user || {}
         if (!userId) {
-            const error = new Error('Unauthorizes') as any;
+            const error = new Error('Unauthorized') as any;
             error.statusCodes = StatusCodes.UNAUTHORIZED
             throw error
         }
@@ -57,8 +57,34 @@ const updateBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
         }
         res.status(StatusCodes.OK).json({ book })
     } catch (error) {
-
+        next(error)
     }
 }
 
-export { getAllBooks, createBook, updateBook }
+const deleteBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { id } = req.params
+        const { userId } = req.user || {}
+        if (!userId) {
+            const error = new Error('Unauthorized') as any;
+            error.statusCodes = StatusCodes.UNAUTHORIZED
+            throw error
+        }
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            const error = new Error('Invalid blog post ID') as any;
+            error.statusCode = StatusCodes.BAD_REQUEST;
+            throw error;
+        }
+        const book = await Books.findOneAndDelete({ _id: id, createdBy: userId });
+        if (!book) {
+            const error = new Error('Book not found or you are not authorized to delete it') as any;
+            error.statusCode = StatusCodes.NOT_FOUND;
+            throw error;
+        }
+        res.status(StatusCodes.OK).json({ message: 'Book has been successfully deleted' })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export { getAllBooks, createBook, updateBook, deleteBook }
