@@ -19,7 +19,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/book', bookRouter)
-app.use('/api/v1/books', commentRouter)
+app.use('/api/v1/comment', commentRouter)
 
 
 app.use(notFound);

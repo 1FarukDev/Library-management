@@ -51,4 +51,29 @@ const createComment = async (req: AuthenticatedRequest, res: Response, next: Nex
     }
 }
 
-export { createComment, getComment }
+const updateComment = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { commentId } = req.params
+        const { userId } = req.user || {}
+        if (!userId) {
+            const error = new Error('Unauthorized') as any;
+            error.statusCodes = StatusCodes.UNAUTHORIZED
+            throw error
+        }
+        const comment = await Comments.findByIdAndUpdate(
+            { _id: commentId, createdBy: userId },
+            req.body,
+            { new: true, runValidators: true }
+        )
+        if (!comment) {
+            const error = new Error('Comment not found or you are not authorized to edit the book') as any
+            error.statusCodes = StatusCodes.NOT_FOUND
+            throw error
+        }
+        res.status(StatusCodes.OK).json({ comment })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export { createComment, getComment, updateComment }
