@@ -3,6 +3,7 @@ import Books from "../models/Books";
 import Comments from "../models/comments";
 import { StatusCodes } from "http-status-codes"
 import { AuthenticatedRequest } from "../@types/express";
+import mongoose from "mongoose";
 
 
 const getComment = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -75,5 +76,31 @@ const updateComment = async (req: AuthenticatedRequest, res: Response, next: Nex
         next(error)
     }
 }
+const deleteComment = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { commentId } = req.params
+        const { userId } = req.user || {}
+        if (!userId) {
+            const error = new Error('Unauthorized') as any;
+            error.statusCodes = StatusCodes.UNAUTHORIZED
+            throw error
+        }
+        if (!mongoose.Types.ObjectId.isValid(commentId)) {
+            const error = new Error('Invalid comment post ID') as any;
+            error.statusCode = StatusCodes.BAD_REQUEST;
+            throw error;
+        }
+        const comment = await Comments.findOneAndDelete({ _id: commentId, user: userId });
+        console.log(comment)
+        if (!comment) {
+            const error = new Error('Comment not found or you are not authorized to delete it') as any;
+            error.statusCode = StatusCodes.NOT_FOUND;
+            throw error;
+        }
+        res.status(StatusCodes.OK).json({ message: 'Comment has been successfully deleted' })
+    } catch (error) {
+        next(error)
+    }
+}
 
-export { createComment, getComment, updateComment }
+export { createComment, getComment, updateComment, deleteComment }
