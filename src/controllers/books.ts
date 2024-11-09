@@ -2,13 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import Books from "../models/Books";
 import { StatusCodes } from "http-status-codes"
 import mongoose from 'mongoose';
-interface AuthenticatedRequest extends Request {
-    user?: {
-        userId: string;
-        name: string
+import { AuthenticatedRequest } from "../@types/express";
 
-    }
-}
 
 const getAllBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -27,8 +22,8 @@ const createBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
             error.statusCodes = StatusCodes.UNAUTHORIZED;
             throw error
         }
-
         req.body.createdBy = req.user.userId;
+        console.log(req.body.createdBy)
         const book = await Books.create(req.body)
         res.status(StatusCodes.CREATED).json({ book })
     } catch (error) {
