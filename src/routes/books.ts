@@ -7,9 +7,9 @@ const router: Router = Router()
 
 router.route('/').get(getAllBooks)
 
-router.route('/').post(authenticateMiddleware,adminonlyMiddleware, createBook)
+router.route('/').post(authenticateMiddleware, adminonlyMiddleware, createBook)
 
-router.route('/:id').patch(authenticateMiddleware, updateBook).delete(authenticateMiddleware, deleteBook).get(getSingleBook)
+router.route('/:id').patch(authenticateMiddleware, adminonlyMiddleware, updateBook).delete(authenticateMiddleware, adminonlyMiddleware, deleteBook).get(getSingleBook)
 
 
 export default router
