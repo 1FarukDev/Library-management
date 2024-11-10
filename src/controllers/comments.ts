@@ -91,7 +91,7 @@ const deleteComment = async (req: AuthenticatedRequest, res: Response, next: Nex
             throw error;
         }
         const comment = await Comments.findOneAndDelete({ _id: commentId, user: userId });
-        console.log(comment)
+
         if (!comment) {
             const error = new Error('Comment not found or you are not authorized to delete it') as any;
             error.statusCode = StatusCodes.NOT_FOUND;
