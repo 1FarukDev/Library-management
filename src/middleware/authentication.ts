@@ -25,7 +25,6 @@ const auth = async (req: AuthenticatedRequest, res: Response, next: NextFunction
     const token = authHeader.split(' ')[1];
     try {
         const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-        console.log(payload, 'name')
         req.user = { userId: payload.userId, name: payload.name, role: payload.role };
 
         next();

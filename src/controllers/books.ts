@@ -23,7 +23,6 @@ const createBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
             throw error
         }
         req.body.createdBy = req.user.userId;
-        console.log(req.body.createdBy)
         const book = await Books.create(req.body)
         res.status(StatusCodes.CREATED).json({ book })
     } catch (error) {
@@ -40,6 +39,7 @@ const updateBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
             error.statusCodes = StatusCodes.UNAUTHORIZED
             throw error
         }
+
         const book = await Books.findOneAndUpdate(
             { _id: id, createdBy: userId },
             req.body,
