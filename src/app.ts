@@ -9,6 +9,7 @@ import notFound from './middleware/not-found';
 import errorHandlerMiddleware from './middleware/error-handler';
 
 dotenv.config()
+
 const app = express();
 app.use(express.json())
 
