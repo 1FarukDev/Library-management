@@ -51,7 +51,6 @@ const verifyEmail = async (req: Request, res: Response) => {
     if (!user) {
         throw new BadRequestError("User not found.");
     }
-
     user.isVerified = true;
     await user.save();
 
@@ -61,4 +60,32 @@ const verifyEmail = async (req: Request, res: Response) => {
 };
 
 
-export { login, register, verifyEmail }
+const requestVerificationEmail = async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.body;
+
+    if (!email) {
+        throw new BadRequestError("Email is required.");
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new BadRequestError("User with this email does not exist.");
+    }
+
+    if (user.isVerified) {
+        res.status(StatusCodes.OK).json({ message: "Your account is already verified." });
+        return;
+    }
+
+    await UserVerification.deleteMany({ userId: user._id });
+
+    const token = await generateVerificationToken(user.id);
+    await sendVerificationEmail(user.email, token);
+
+    res.status(StatusCodes.OK).json({
+        message: "Verification email has been sent. Please check your inbox.",
+    });
+};
+
+
+export { login, register, verifyEmail, requestVerificationEmail }
