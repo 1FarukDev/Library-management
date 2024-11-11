@@ -5,6 +5,9 @@ import { StatusCodes } from "http-status-codes";
 import generateVerificationToken from "../utils/generate-tokem";
 import { sendVerificationEmail } from "../utils/send-email";
 import UserVerification from "../models/UserVerification";
+import generateResetToken from "../utils/generate-reset-token";
+import { sendResetPasswordEmail } from "../utils/send-reset-password-email";
+import PasswordReset from "../models/PasswordReset";
 
 const register = async (req: Request, res: Response) => {
     const user = await User.create({ ...req.body })
@@ -87,5 +90,54 @@ const requestVerificationEmail = async (req: Request, res: Response): Promise<vo
     });
 };
 
+const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.body;
 
-export { login, register, verifyEmail, requestVerificationEmail }
+    if (!email) {
+        throw new BadRequestError("Email is required.");
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new BadRequestError("User with this email does not exist.");
+    }
+
+    const token = await generateResetToken(user.id);
+
+    const resetUrl = `http://localhost:3000/reset-password?token=${token}`;
+    await sendResetPasswordEmail(user.email, resetUrl);
+
+    res.status(StatusCodes.OK).json({
+        message: "Password reset email has been sent.",
+    });
+};
+
+const resetPassword = async (req: Request, res: Response): Promise<void> => {
+    const { password } = req.body;
+    const { token } = req.query;
+
+    if (!token || !password) {
+        throw new BadRequestError("Token and new password are required.");
+    }
+
+    const resetRecord = await PasswordReset.findOne({ token });
+
+    if (!resetRecord || new Date() > resetRecord.expiresAt) {
+        throw new BadRequestError("Invalid or expired reset token.");
+    }
+
+    const user = await User.findById(resetRecord.userId);
+    if (!user) {
+        throw new BadRequestError("User not found.");
+    }
+    user.password = password;
+    await user.save();
+    await PasswordReset.findByIdAndDelete(resetRecord._id);
+
+    res.status(StatusCodes.OK).json({
+        message: "Password reset successful.",
+    });
+};
+
+
+export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword }

@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 const generateVerificationToken = async (userId: mongoose.Types.ObjectId) => {
     const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Token expires in 24 hours
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await UserVerification.create({
         userId,
