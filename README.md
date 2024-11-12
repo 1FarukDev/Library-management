@@ -304,4 +304,4 @@ Thank you for contributing to the Library Management System! Your efforts help m
 
 ## Data base schema design
 
-![Database design schema](src/assets/images/Librarydatabaseschema.png)
+![Database design schema](src/assets/images/Librarydatabaseschema2.png)
