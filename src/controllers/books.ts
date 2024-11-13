@@ -6,7 +6,6 @@ import { AuthenticatedRequest } from "../@types/express";
 
 
 const getAllBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { query } = req
     try {
         const books = await Books.find(req.query)
         res.status(StatusCodes.OK).json({ books, count: books.length })
@@ -15,6 +14,22 @@ const getAllBooks = async (req: Request, res: Response, next: NextFunction): Pro
     }
 }
 
+const getSearchedBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { key } = req.params
+    try {
+        const books = await Books.find(
+            {
+                "$or": [
+                    { author: { $regex: key } },
+                    { price: parseFloat(key) }
+                ]
+            }
+        )
+        res.status(StatusCodes.OK).json({ books, count: books.length })
+    } catch (error) {
+        next(error)
+    }
+}
 
 const createBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -98,4 +113,4 @@ const getSingleBook = async (req: Request, res: Response, next: NextFunction): P
     }
 }
 
-export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook }
+export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks }
