@@ -6,8 +6,9 @@ import { AuthenticatedRequest } from "../@types/express";
 
 
 const getAllBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { query } = req
     try {
-        const books = await Books.find({})
+        const books = await Books.find(req.query)
         res.status(StatusCodes.OK).json({ books, count: books.length })
     } catch (error) {
         next(error)
