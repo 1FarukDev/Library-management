@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { BadRequestError, UnauthenticatedError } from "../errors";
 import User from "../models/User";
 import { StatusCodes } from "http-status-codes";
@@ -8,6 +8,7 @@ import UserVerification from "../models/UserVerification";
 import generateResetToken from "../utils/generate-reset-token";
 import { sendResetPasswordEmail } from "../utils/send-reset-password-email";
 import PasswordReset from "../models/PasswordReset";
+import { AuthenticatedRequest } from "../@types/express";
 
 const register = async (req: Request, res: Response) => {
     const user = await User.create({ ...req.body })
@@ -139,5 +140,20 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     });
 };
 
+const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { userId } = req.query || {}
+        const user = await User.findById(userId)
+        if (!userId) {
+            const error = new Error('User not found') as any
+            error.statusCodes = StatusCodes.NOT_FOUND
+            throw error
+        }
+        res.status(StatusCodes.OK).json({ user })
+    } catch (error) {
+        next(error)
+    }
+}
 
-export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword }
+
+export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, getUserProfile }
