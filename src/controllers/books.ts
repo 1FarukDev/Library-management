@@ -137,4 +137,29 @@ const borrowBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
     }
 }
 
-export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks, borrowBook }
+const returnBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { userId } = req.user || {}
+        const { bookId } = req.body
+        const borrowRecord = await BorrowBook.findOne({ book: bookId, user: userId })
+        if (!borrowRecord) {
+            res.status(StatusCodes.NOT_FOUND).json({ message: 'No borrow record found for this book and the user' })
+            return
+        }
+        const book = await Books.findById(bookId)
+        if (!book || !book.formats.physical) {
+            res.status(StatusCodes.BAD_REQUEST).json({ message: "Book not available" });
+            return
+        }
+
+        book.formats.physical.stock += 1
+        await book.save()
+        await BorrowBook.findByIdAndDelete(borrowRecord._id)
+        res.status(StatusCodes.OK).json({ message: 'Book returned successfully' });
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks, borrowBook, returnBook }
