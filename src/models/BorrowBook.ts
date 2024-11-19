@@ -10,6 +10,11 @@ export interface IBorrow extends Document {
     returnedAt?: Date;
 }
 
+export interface IBorrowPopulated extends Omit<IBorrow, 'user' | 'book'> {
+    user: IUser;
+    book: IBook;
+}
+
 const BorrowSchema = new Schema<IBorrow>(
     {
         user: {

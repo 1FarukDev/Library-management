@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-async-errors": "^3.1.1",
@@ -19,6 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.9.0",
     "mongoose": "^8.7.3",
+    "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.7.6",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.16",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.6.3"
