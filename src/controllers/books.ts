@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes"
 import mongoose from 'mongoose';
 import { AuthenticatedRequest } from "../@types/express";
 import BorrowBook from "../models/BorrowBook";
+import PurchaseBooks from "../models/PurchaseBooks";
 
 
 const getAllBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -162,4 +163,46 @@ const returnBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
     }
 }
 
-export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks, borrowBook, returnBook }
+const buyBook = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { userId } = req.user || {}
+        const { bookId, format, quantity } = req.body;
+
+        const book = await Books.findById(bookId);
+        if (!book) {
+            res.status(404).json({ message: 'Book not found' });
+            return;
+        }
+        if (format === 'physical') {
+            if (!book.formats.physical) {
+                res.status(400).json({ message: 'Physical format is not available for this book.' });
+                return;
+            }
+
+            if (book.formats.physical.stock < quantity) {
+                res.status(400).json({ message: 'Not enough stock available' });
+                return;
+            }
+            book.formats.physical.stock -= quantity;
+        }
+        const purchaseBook = await PurchaseBooks.create({
+            user: userId,
+            book: book._id,
+            format: format,
+            price: book.price * quantity,
+            purchasedAt: new Date(),
+        })
+        book.sales = (book.sales || 0) + quantity;
+        await book.save();
+
+        res.status(200).json({ message: 'Purchase successful', purchaseBook });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks, borrowBook, returnBook, buyBook }
