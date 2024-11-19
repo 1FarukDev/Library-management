@@ -3,6 +3,7 @@ import Books from "../models/Books";
 import { StatusCodes } from "http-status-codes"
 import mongoose from 'mongoose';
 import { AuthenticatedRequest } from "../@types/express";
+import BorrowBook from "../models/BorrowBook";
 
 
 const getAllBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -113,4 +114,27 @@ const getSingleBook = async (req: Request, res: Response, next: NextFunction): P
     }
 }
 
-export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks }
+const borrowBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { userId } = req.user || {}
+        const { bookId, dueDate } = req.body
+        const book = await Books.findById(bookId);
+        if (!book || !book.formats.physical || book.formats.physical.stock < 1) {
+            res.status(StatusCodes.BAD_REQUEST).json({ message: "Book not available for borrowing" });
+            return
+        }
+        const borrow = await BorrowBook.create({
+            user: userId,
+            book: bookId,
+            dueDate
+        })
+
+        book.formats.physical.stock -= 1
+        await book.save()
+        res.status(StatusCodes.CREATED).json({ borrow })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks, borrowBook }
