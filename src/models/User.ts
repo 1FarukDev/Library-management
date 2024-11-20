@@ -19,6 +19,7 @@ export interface IUser extends Document {
     updatedAt: Date;
     createJWT: () => string;
     comparePassword: (candidatePassword: string) => Promise<boolean>;
+    balance: number
 }
 
 const userSchema = new Schema<IUser>(
@@ -71,7 +72,12 @@ const userSchema = new Schema<IUser>(
             type: String,
             default: "user",
             enum: ["user", "admin"],
-        }
+        },
+        balance: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
     },
     {
         timestamps: true,
