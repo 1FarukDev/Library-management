@@ -20,6 +20,7 @@ export interface IBook extends Document {
     };
     createdBy: IUser["_id"];
     comments: IComment["_id"][];
+    sales: number;  // To track number of books sold
     createdAt: Date;
     updatedAt: Date;
 }
@@ -84,6 +85,10 @@ const bookSchema: Schema = new Schema(
                 ref: "comments",
             },
         ],
+        sales: {
+            type: Number,
+            default: 0, 
+        },
     },
     {
         timestamps: true,

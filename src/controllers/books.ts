@@ -3,6 +3,8 @@ import Books from "../models/Books";
 import { StatusCodes } from "http-status-codes"
 import mongoose from 'mongoose';
 import { AuthenticatedRequest } from "../@types/express";
+import BorrowBook from "../models/BorrowBook";
+import PurchaseBooks from "../models/PurchaseBooks";
 
 
 const getAllBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -113,4 +115,94 @@ const getSingleBook = async (req: Request, res: Response, next: NextFunction): P
     }
 }
 
-export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks }
+const borrowBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { userId } = req.user || {}
+        const { bookId, dueDate } = req.body
+        const book = await Books.findById(bookId);
+        if (!book || !book.formats.physical || book.formats.physical.stock < 1) {
+            res.status(StatusCodes.BAD_REQUEST).json({ message: "Book not available for borrowing" });
+            return
+        }
+        const borrow = await BorrowBook.create({
+            user: userId,
+            book: bookId,
+            dueDate
+        })
+
+        book.formats.physical.stock -= 1
+        await book.save()
+        res.status(StatusCodes.CREATED).json({ borrow })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const returnBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { userId } = req.user || {}
+        const { bookId } = req.body
+        const borrowRecord = await BorrowBook.findOne({ book: bookId, user: userId })
+        if (!borrowRecord) {
+            res.status(StatusCodes.NOT_FOUND).json({ message: 'No borrow record found for this book and the user' })
+            return
+        }
+        const book = await Books.findById(bookId)
+        if (!book || !book.formats.physical) {
+            res.status(StatusCodes.BAD_REQUEST).json({ message: "Book not available" });
+            return
+        }
+
+        book.formats.physical.stock += 1
+        await book.save()
+        await BorrowBook.findByIdAndDelete(borrowRecord._id)
+        res.status(StatusCodes.OK).json({ message: 'Book returned successfully' });
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+const buyBook = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { userId } = req.user || {}
+        const { bookId, format, quantity } = req.body;
+
+        const book = await Books.findById(bookId);
+        if (!book) {
+            res.status(404).json({ message: 'Book not found' });
+            return;
+        }
+        if (format === 'physical') {
+            if (!book.formats.physical) {
+                res.status(400).json({ message: 'Physical format is not available for this book.' });
+                return;
+            }
+
+            if (book.formats.physical.stock < quantity) {
+                res.status(400).json({ message: 'Not enough stock available' });
+                return;
+            }
+            book.formats.physical.stock -= quantity;
+        }
+        const purchaseBook = await PurchaseBooks.create({
+            user: userId,
+            book: book._id,
+            format: format,
+            price: book.price * quantity,
+            purchasedAt: new Date(),
+        })
+        book.sales = (book.sales || 0) + quantity;
+        await book.save();
+
+        res.status(200).json({ message: 'Purchase successful', purchaseBook });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { getAllBooks, createBook, updateBook, deleteBook, getSingleBook, getSearchedBooks, borrowBook, returnBook, buyBook }
