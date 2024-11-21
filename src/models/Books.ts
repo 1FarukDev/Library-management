@@ -20,7 +20,9 @@ export interface IBook extends Document {
     };
     createdBy: IUser["_id"];
     comments: IComment["_id"][];
-    sales: number;  // To track number of books sold
+    bookUrl: string
+    cloudinaryPublicId: string
+    sales: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -87,7 +89,15 @@ const bookSchema: Schema = new Schema(
         ],
         sales: {
             type: Number,
-            default: 0, 
+            default: 0,
+        },
+        cloudinaryPublicId: {
+            type: String,
+            trim: true
+        },
+        bookUrl: {
+            type: String,
+            trim: true
         },
     },
     {
