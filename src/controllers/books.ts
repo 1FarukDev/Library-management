@@ -5,6 +5,8 @@ import mongoose from 'mongoose';
 import { AuthenticatedRequest } from "../@types/express";
 import BorrowBook from "../models/BorrowBook";
 import PurchaseBooks from "../models/PurchaseBooks";
+import { BookUploadService } from "../service/upload-services";
+import fs from 'fs';
 
 
 const getAllBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -35,18 +37,31 @@ const getSearchedBooks = async (req: Request, res: Response, next: NextFunction)
 
 const createBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
+
         if (!req.user || !req.user.userId) {
             const error = new Error('Unauthorized') as any;
-            error.statusCodes = StatusCodes.UNAUTHORIZED;
-            throw error
+            error.statusCode = StatusCodes.UNAUTHORIZED;
+            throw error;
         }
-        req.body.createdBy = req.user.userId;
-        const book = await Books.create(req.body)
-        res.status(StatusCodes.CREATED).json({ book })
+        if (!req.file) {
+            const error = new Error('No book file uploaded') as any;
+            error.statusCode = StatusCodes.BAD_REQUEST;
+            throw error;
+        }
+        const cloudinaryUpload = await BookUploadService.uploadBook(req.file.path);
+        const bookData = {
+            ...req.body,
+            createdBy: req.user.userId,
+            bookUrl: cloudinaryUpload.url,
+            cloudinaryPublicId: cloudinaryUpload.publicId
+        };
+        const book = await Books.create(bookData);
+        res.status(StatusCodes.CREATED).json({ book });
     } catch (error) {
-        next(error)
+        next(error);
     }
-}
+};
+
 
 const updateBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {

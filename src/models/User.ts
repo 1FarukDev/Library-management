@@ -20,6 +20,8 @@ export interface IUser extends Document {
     createJWT: () => string;
     comparePassword: (candidatePassword: string) => Promise<boolean>;
     balance: number
+    bookUrl: string
+    cloudinaryPublicId: string
 }
 
 const userSchema = new Schema<IUser>(
@@ -78,6 +80,14 @@ const userSchema = new Schema<IUser>(
             default: 0,
             min: 0,
         },
+        bookUrl: {
+            type: String,
+            trim: true,
+        },
+        cloudinaryPublicId: {
+            type: String,
+            trim: true,
+        }
     },
     {
         timestamps: true,
