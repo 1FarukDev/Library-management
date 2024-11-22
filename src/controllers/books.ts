@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from "../@types/express";
 import BorrowBook from "../models/BorrowBook";
 import PurchaseBooks from "../models/PurchaseBooks";
 import { BookUploadService } from "../service/upload-services";
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
 
 
 const getAllBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -91,29 +91,44 @@ const updateBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
 
 const deleteBook = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { id } = req.params
-        const { userId } = req.user || {}
+        const { id } = req.params;
+        const { userId } = req.user || {};
+
         if (!userId) {
             const error = new Error('Unauthorized') as any;
-            error.statusCodes = StatusCodes.UNAUTHORIZED
-            throw error
+            error.statusCode = StatusCodes.UNAUTHORIZED;
+            throw error;
         }
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            const error = new Error('Invalid blog post ID') as any;
+            const error = new Error('Invalid Book ID') as any;
             error.statusCode = StatusCodes.BAD_REQUEST;
             throw error;
         }
-        const book = await Books.findOneAndDelete({ _id: id, createdBy: userId });
+        const book = await Books.findOne({ _id: id, createdBy: userId });
         if (!book) {
             const error = new Error('Book not found or you are not authorized to delete it') as any;
             error.statusCode = StatusCodes.NOT_FOUND;
             throw error;
         }
-        res.status(StatusCodes.OK).json({ message: 'Book has been successfully deleted' })
+        if (book.cloudinaryPublicId) {
+            await cloudinary.api
+                .delete_resources([book.cloudinaryPublicId],
+                    { type: 'upload', resource_type: 'raw' })
+
+        }
+        const deletedBook = await Books.findOneAndDelete({ _id: id, createdBy: userId });
+        if (!deletedBook) {
+            const error = new Error('Error deleting the book record') as any;
+            error.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+            throw error;
+        }
+
+        res.status(StatusCodes.OK).json({ message: 'Book has been successfully deleted' });
     } catch (error) {
-        next(error)
+        next(error);
     }
-}
+};
 
 const getSingleBook = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
