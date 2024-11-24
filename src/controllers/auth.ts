@@ -9,6 +9,7 @@ import generateResetToken from "../utils/generate-reset-token";
 import { sendResetPasswordEmail } from "../utils/send-reset-password-email";
 import PasswordReset from "../models/PasswordReset";
 import { AuthenticatedRequest } from "../@types/express";
+import passport from '../config/passport'
 
 const register = async (req: Request, res: Response) => {
     const user = await User.create({ ...req.body })
@@ -143,17 +144,27 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { userId } = req.query || {}
-        const user = await User.findById(userId)
         if (!userId) {
             const error = new Error('User not found') as any
             error.statusCodes = StatusCodes.NOT_FOUND
             throw error
         }
+        const user = await User.findById(userId)
         res.status(StatusCodes.OK).json({ user })
     } catch (error) {
         next(error)
     }
 }
+const initiateGoogleAuth = passport.authenticate("google", {
+    scope: ["profile", "email"],
+});
+
+const handleGoogleCallback = [
+    passport.authenticate("google", { failureRedirect: "/" }),
+    (req: Request, res: Response) => {
+        res.send("Logged in successfully!");
+    },
+];
 
 
-export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, getUserProfile }
+export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, getUserProfile, initiateGoogleAuth, handleGoogleCallback }
