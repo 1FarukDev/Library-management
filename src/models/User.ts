@@ -22,6 +22,7 @@ export interface IUser extends Document {
     balance: number
     bookUrl: string
     cloudinaryPublicId: string
+    googleId: string
 }
 
 const userSchema = new Schema<IUser>(
@@ -67,7 +68,7 @@ const userSchema = new Schema<IUser>(
         },
         password: {
             type: String,
-            required: true,
+            required: false,
             select: false,
         },
         role: {
@@ -85,6 +86,10 @@ const userSchema = new Schema<IUser>(
             trim: true,
         },
         cloudinaryPublicId: {
+            type: String,
+            trim: true,
+        },
+        googleId: {
             type: String,
             trim: true,
         }

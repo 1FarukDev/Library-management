@@ -161,8 +161,30 @@ const initiateGoogleAuth = passport.authenticate("google", {
 
 const handleGoogleCallback = [
     passport.authenticate("google", { failureRedirect: "/" }),
-    (req: Request, res: Response) => {
-        res.send("Logged in successfully!");
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userProfile = req.user as {
+                googleId: string;
+                name: string;
+                email?: string;
+            };
+
+            let user = await User.findOne({ googleId: userProfile.googleId });
+            if (!user) {
+                user = new User({
+                    googleId: userProfile.googleId,
+                    name: userProfile.name,
+                    email: userProfile.email,
+                    first_name: userProfile.name.split(' ')[0] || 'N/A',
+                    last_name: userProfile.name.split(' ')[1] || 'N/A',
+                    username: userProfile.email || userProfile.googleId,
+                });
+                await user.save();
+            }
+            res.status(StatusCodes.OK).send("Logged in and user saved successfully!");
+        } catch (error) {
+            next(error);
+        }
     },
 ];
 

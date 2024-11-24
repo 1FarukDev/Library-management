@@ -6,6 +6,7 @@ interface JwtPayload {
     userId: string;
     name: string;
     role: "user" | "admin";
+    googleId?: string
 }
 
 
@@ -14,6 +15,7 @@ interface AuthenticatedRequest extends Request {
         userId: string;
         name: string;
         role: "user" | "admin";
+        googleId?: string
     };
 }
 
