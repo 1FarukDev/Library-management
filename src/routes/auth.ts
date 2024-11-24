@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, getUserProfile } from "../controllers/auth";
+import { register, login, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, getUserProfile, handleGoogleCallback, initiateGoogleAuth } from "../controllers/auth";
 import checkVerified from "../middleware/check-verification";
 
 const router: Router = Router()
@@ -11,5 +11,8 @@ router.post("/request-verification-email", requestVerificationEmail);
 router.post("/forgot-password", forgotPassword)
 router.post("/reset-password", resetPassword)
 router.get("/user-profile", getUserProfile)
+router.get("/google", initiateGoogleAuth);
+router.get("/google/callback", handleGoogleCallback);
+
 
 export default router

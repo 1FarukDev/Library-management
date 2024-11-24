@@ -7,6 +7,7 @@ declare global {
                 userId: string;
                 name: string;
                 role: "user" | "admin";
+                googleId?: string
             };
         }
     }
@@ -19,5 +20,19 @@ export interface AuthenticatedRequest extends Request {
         userId: string;
         name: string
         role: "user" | "admin";
+    }
+}
+
+
+
+export interface GoogleUser {
+    googleId: string;
+    name: string;
+    email?: string;
+}
+
+declare global {
+    namespace Express {
+        interface User extends GoogleUser { }
     }
 }

@@ -9,6 +9,7 @@ import generateResetToken from "../utils/generate-reset-token";
 import { sendResetPasswordEmail } from "../utils/send-reset-password-email";
 import PasswordReset from "../models/PasswordReset";
 import { AuthenticatedRequest } from "../@types/express";
+import passport from '../config/passport'
 
 const register = async (req: Request, res: Response) => {
     const user = await User.create({ ...req.body })
@@ -143,17 +144,49 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { userId } = req.query || {}
-        const user = await User.findById(userId)
         if (!userId) {
             const error = new Error('User not found') as any
             error.statusCodes = StatusCodes.NOT_FOUND
             throw error
         }
+        const user = await User.findById(userId)
         res.status(StatusCodes.OK).json({ user })
     } catch (error) {
         next(error)
     }
 }
+const initiateGoogleAuth = passport.authenticate("google", {
+    scope: ["profile", "email"],
+});
+
+const handleGoogleCallback = [
+    passport.authenticate("google", { failureRedirect: "/" }),
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userProfile = req.user as {
+                googleId: string;
+                name: string;
+                email?: string;
+            };
+
+            let user = await User.findOne({ googleId: userProfile.googleId });
+            if (!user) {
+                user = new User({
+                    googleId: userProfile.googleId,
+                    name: userProfile.name,
+                    email: userProfile.email,
+                    first_name: userProfile.name.split(' ')[0] || 'N/A',
+                    last_name: userProfile.name.split(' ')[1] || 'N/A',
+                    username: userProfile.email || userProfile.googleId,
+                });
+                await user.save();
+            }
+            res.status(StatusCodes.OK).send("Logged in and user saved successfully!");
+        } catch (error) {
+            next(error);
+        }
+    },
+];
 
 
-export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, getUserProfile }
+export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, getUserProfile, initiateGoogleAuth, handleGoogleCallback }
