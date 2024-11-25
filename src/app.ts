@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import 'express-async-errors'
 import connectDB from './db/connect';
 import authRouter from './routes/auth';
+import userRouter from './routes/user'
 import bookRouter from './routes/books'
 import paymentRouter from './routes/transaction'
 import commentRouter from './routes/comments'
@@ -35,6 +36,7 @@ app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/book', bookRouter)
 app.use('/api/v1/comment', commentRouter)
 app.use('/api/v1/payment', paymentRouter)
+app.use('/api/v1/user', userRouter)
 
 
 

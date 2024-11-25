@@ -141,20 +141,8 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     });
 };
 
-const getUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { userId } = req.query || {}
-        if (!userId) {
-            const error = new Error('User not found') as any
-            error.statusCodes = StatusCodes.NOT_FOUND
-            throw error
-        }
-        const user = await User.findById(userId)
-        res.status(StatusCodes.OK).json({ user })
-    } catch (error) {
-        next(error)
-    }
-}
+
+
 const initiateGoogleAuth = passport.authenticate("google", {
     scope: ["profile", "email"],
 });
@@ -189,4 +177,4 @@ const handleGoogleCallback = [
 ];
 
 
-export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, getUserProfile, initiateGoogleAuth, handleGoogleCallback }
+export { login, register, verifyEmail, requestVerificationEmail, forgotPassword, resetPassword, initiateGoogleAuth, handleGoogleCallback }
