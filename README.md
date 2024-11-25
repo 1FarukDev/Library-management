@@ -176,6 +176,7 @@ interface User {
   email: string;
   role: 'user' | 'admin';
   name: string;
+  googleId?:string
 }
 
 // Authentication middleware

@@ -6,6 +6,13 @@ interface BookUploadResponse {
     publicId: string;
     bytes: number;
 }
+interface AvatarUploadResponse {
+    url: string;
+    publicId: string;
+    bytes: number;
+}
+
+
 
 export class BookUploadService {
     static async uploadBook(filePath: string): Promise<BookUploadResponse> {
@@ -27,6 +34,29 @@ export class BookUploadService {
         } catch (error) {
             console.error('Cloudinary upload error:', error);
             throw new Error('Book upload failed');
+        }
+    }
+}
+
+export class AvatarUploadService {
+    static async uploadAvatar(filePath: string): Promise<AvatarUploadResponse> {
+        try {
+            const uploadAvatarResult = await cloudinary.uploader.upload(filePath, {
+                folder: 'avatar',
+                resource_type: 'raw',
+                use_filename: true,
+                unique_filename: true
+            })
+            await fs.unlink(filePath)
+            return {
+                url: uploadAvatarResult.secure_url,
+                publicId: uploadAvatarResult.public_id,
+                bytes: uploadAvatarResult.bytes
+            }
+        } catch (error) {
+            console.error('Cloudnary upload error', error)
+            throw new Error('Book upload failed')
+
         }
     }
 }
