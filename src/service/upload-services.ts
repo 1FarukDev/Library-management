@@ -10,6 +10,7 @@ interface AvatarUploadResponse {
     url: string;
     publicId: string;
     bytes: number;
+    
 }
 
 
@@ -55,8 +56,17 @@ export class AvatarUploadService {
             }
         } catch (error) {
             console.error('Cloudnary upload error', error)
-            throw new Error('Book upload failed')
+            throw new Error('Avatar upload failed')
 
+        }
+    }
+
+    static async deleteAvatar(publicId: string): Promise<void> {
+        try {
+            await cloudinary.uploader.destroy(publicId);
+        } catch (error) {
+            console.error('Cloudinary delete error', error);
+            throw new Error('Failed to delete the avatar');
         }
     }
 }
