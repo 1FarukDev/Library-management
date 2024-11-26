@@ -1,20 +1,6 @@
 import multer from 'multer';
-import fs from 'fs';
-import path from 'path';
 
-const uploadsDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 const uploadMiddleware = multer({
   storage,
@@ -32,7 +18,7 @@ const uploadMiddleware = multer({
       cb(new Error('Invalid file type. Only PDF, EPUB, JPEG, PNG, and JPG are allowed.'));
     }
   },
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 }, 
 });
 
 export default uploadMiddleware;

@@ -42,9 +42,6 @@ passport.use(
         }
     )
 );
-// console.log(process.env.GOOGLE_CLIENT_ID,
-//     process.env.GOOGLE_CLIENT_SECRET,
-//     process.env.CALLBACK_URL)
 passport.serializeUser((user: Express.User, done) => {
     done(null, (user as User).id);
 });
