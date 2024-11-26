@@ -48,7 +48,7 @@ const createBook = async (req: AuthenticatedRequest, res: Response, next: NextFu
             error.statusCode = StatusCodes.BAD_REQUEST;
             throw error;
         }
-        const cloudinaryUpload = await BookUploadService.uploadBook(req.file.path);
+        const cloudinaryUpload = await BookUploadService.uploadBook(req.file.buffer, req.file.originalname);
         const bookData = {
             ...req.body,
             createdBy: req.user.userId,

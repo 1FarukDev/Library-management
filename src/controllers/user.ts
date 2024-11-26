@@ -31,11 +31,11 @@ const updateUserProfile = async (
         if (req.file) {
             if (existingUser.avatar && existingUser.avatar.id) {
                 await cloudinary.api.delete_resources([existingUser.avatar.id],
-                    { type: 'upload', resource_type: 'raw' })
+                    { type: 'upload', resource_type: 'image' })
             }
 
 
-            const cloudinaryUpload = await AvatarUploadService.uploadAvatar(req.file.path);
+            const cloudinaryUpload = await AvatarUploadService.uploadAvatar(req.file.buffer, req.file.originalname);
             updateData.avatar = {
                 url: cloudinaryUpload.url,
                 id: cloudinaryUpload.publicId,
